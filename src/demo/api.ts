@@ -3,6 +3,7 @@
 import type { AnswerResult, DailySet, DexEntry, Forecast, GameApi, Home, Item, League, LedgerRow, News, PetInfo, Promo, Skill, Source } from '../api/game'
 import { addDays, ASSETS, kstToday, type Asset, type Pick } from '../domain/forecast'
 import { FOCUS_MIN, LEGEND_MIN, STAT_KEYS, type StatKey, type Stats } from '../domain/stats'
+import { store } from '../lib/store'
 
 const SKILLS: { id: string; stat: StatKey; name: string }[] = [
   { id: 'impersonation', stat: 'shield', name: '기관사칭' },
@@ -64,20 +65,24 @@ const DIAGNOSIS: DemoItem[] = [
     '갑자기 일이 끊기거나 큰 지출이 생겨도 버틸 수 있는 기간이야. 한 번에 못 모으면 1개월분부터 시작해.'),
 ]
 
+// 오늘 문제: 시연 시나리오 순서 그대로 (사기 문자 → 전세 + 제휴 → 리볼빙으로 신용 60 → 진화)
 const DAILY: DemoItem[] = [
-  quiz('reg-05', 'registry', '매매가 2억원짜리 빌라에 전세 1억 9천만원. 이 집은?', ['깡통전세 위험이 크다', '전세가가 높으니 좋은 집이다'],
-    '전세가가 매매가에 가까우면 집값이 조금만 떨어져도 보증금을 다 돌려받지 못할 수 있어.'),
   fraud('imp-02', 'impersonation', '[Web발신]', '금',
     '[금융감독원] 고객님 계좌가 범죄에 연루되어 보호조치가 필요합니다. 아래 앱 설치 후 담당자 안내를 따르세요 http://fss-safe.app',
     '금융감독원은 개인에게 문자로 앱 설치나 계좌 보호조치를 안내하지 않아. 원격제어·악성 앱을 깔게 하는 전형적인 수법이야.'),
-  quiz('mov-01', 'move_in', '이사하고 전입신고를 하면 대항력은 언제 생길까?', ['다음 날 0시', '신고 즉시'],
-    '대항력은 이사와 전입신고를 마친 다음 날 0시부터 생겨. 그 사이 집주인이 받은 대출이 내 보증금보다 앞설 수 있어.'),
+  quiz('reg-05', 'registry', '매매가 2억원짜리 빌라에 전세 1억 9천만원. 이 집은?', ['깡통전세 위험이 크다', '전세가가 높으니 좋은 집이다'],
+    '전세가가 매매가에 가까우면 집값이 조금만 떨어져도 보증금을 다 돌려받지 못할 수 있어.'),
   quiz('rev-01', 'revolving', '리볼빙을 계속 쓰면?', ['수수료가 쌓여 빚이 불어난다', '이자 없이 미룰 수 있다'],
     '넘긴 금액에 연 15~19% 수준의 수수료가 붙어 원금이 잘 안 줄어.'),
+]
+// 집중 치료에만 쓰는 문제
+const EXTRA: DemoItem[] = [
+  quiz('mov-01', 'move_in', '이사하고 전입신고를 하면 대항력은 언제 생길까?', ['다음 날 0시', '신고 즉시'],
+    '대항력은 이사와 전입신고를 마친 다음 날 0시부터 생겨. 그 사이 집주인이 받은 대출이 내 보증금보다 앞설 수 있어.'),
   quiz('auto-01', 'autopay', '저축이 잘 되는 순서는?', ['월급날 저축 자동이체 → 남은 돈으로 생활', '생활하고 남은 돈을 저축'],
     '남는 돈을 저축하려 하면 대부분 남지 않아. 먼저 떼어두고 나머지로 생활하는 게 핵심이야.'),
 ]
-const BANK = [...DAILY, ...DIAGNOSIS]
+const BANK = [...DAILY, ...EXTRA, ...DIAGNOSIS]
 
 const NEWS_TITLES: [string, string][] = [
   ['코스피, 외국인 순매수에 2,600선 회복', '시연 경제'],
@@ -112,13 +117,16 @@ type State = {
   adultDays: number
   genStats: Stats | null
   dex: DexEntry[]
+  leagueCode?: string | null // 친구 리그 (만들기·참여·나가기)
 }
 
 const KEY = 'jigapmon.demo.state'
 
 // 한 달쯤 매일 돌봐서 모은 돈 (하루 예보 3 · 문제 5 · 적중 1~3개, 서버와 같은 금액).
-// 오늘 문제를 다 풀면 커피 교환(2,000원)에 닿도록 잡았다.
-const START_POINTS = 1980
+// 코스피 예보 + 오늘 문제 3개를 풀면 커피 교환(2,000원)을 넘도록 잡았다 (틀려도 2,000원은 넘는다).
+const START_POINTS = 1990
+// 환율·비트코인은 이미 골라둔 상태: 시연에선 홈의 코스피 우표 하나만 고른다
+const START_PICKS: Partial<Record<Asset, Pick>> = { fx: 'down', coin: 'up' }
 function history(now: number): LedgerRow[] {
   const rows: LedgerRow[] = []
   let left = START_POINTS, id = 1
@@ -148,7 +156,7 @@ function fresh(): State {
     points: START_POINTS,
     week: 186,
     done: [],
-    picks: {},
+    picks: { ...START_PICKS },
     ledger: history(now),
     gen: 3,
     focus: 'credit',
@@ -166,6 +174,13 @@ function load(): State {
   } catch {
     // 저장소를 못 쓰면 메모리에서만 진행
   }
+  return start()
+}
+
+/** 시연 시작: 결과 팝업 없이 바로 홈 (결과 발표는 진화 뒤에 이어서 뜬다) */
+function start(): State {
+  store.set('seenResult', addDays(kstToday(), -1))
+  store.take('evolved')
   return fresh()
 }
 
@@ -244,11 +259,12 @@ export const demoApi: GameApi = {
       ['돈모아몬', 412, 3, false], ['절약왕', 365, 3, true], ['짠테크', 290, 2, true], ['코인말고적금', 244, 2, true],
       ['월급루팡', 150, 2, true], ['전세지킴이', 132, 1, true], ['통장쪼개기', 98, 1, true], ['새내기몬', 61, 1, true], ['알부자', 30, 0, true],
     ]
-    const rows = [...others.map(([nick, score, stage, bot]) => ({ nick, score, stage, form: null, bot, me: false })),
+    // 친구 리그에는 봇을 넣지 않는다 (서버 get_league 와 같음)
+    const rows = [...others.map(([nick, score, stage, bot]) => ({ nick, score, stage, form: null, bot: bot && !state.leagueCode, me: false })),
       { nick: state.nick ?? '나', score: state.week, stage: state.stage, form: state.form, bot: false, me: true }]
       .sort((a, b) => b.score - a.score)
       .map((r, i) => ({ ...r, rank: i + 1 }))
-    return wait<League>({ tier: 2, league_code: null, week_start: kstToday(), rows })
+    return wait<League>({ tier: 2, league_code: state.leagueCode ?? null, week_start: kstToday(), rows })
   },
 
   ledger: () => wait(state.ledger),
@@ -342,7 +358,11 @@ export const demoApi: GameApi = {
     return wait({ stage: 1, focus })
   },
 
-  setLeague: (code) => wait(code === null ? 'DEMO42' : code || null),
+  setLeague: (code) => {
+    state.leagueCode = code === null ? 'JGM2K7' : code || null // null = 만들기, '' = 나가기
+    save()
+    return wait(state.leagueCode)
+  },
 
   setNick: (nick) => {
     state.nick = nick.trim() || null
@@ -390,7 +410,7 @@ export const demoControls = {
   /** 오늘 문제·예보를 처음 상태로 */
   resetToday() {
     state.done = []
-    state.picks = {}
+    state.picks = { ...START_PICKS }
     if (state.stage === 3) {
       state.stage = 2
       state.form = null
@@ -406,7 +426,7 @@ export const demoControls = {
   },
   /** 시연 시작 상태로 (재촬영용) */
   reset() {
-    state = fresh()
+    state = start()
     save()
   },
   /** 알부터: 진단 → 부화 */

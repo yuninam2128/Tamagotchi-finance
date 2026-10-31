@@ -14,7 +14,7 @@ export default function Dex() {
   const count = FORMS.filter((f) => byForm.has(f)).length
 
   return (
-    <main className="flex flex-1 flex-col gap-5 px-1.5 pt-[20px] pb-[45px]">
+    <main className="flex flex-1 flex-col gap-5 px-1.5 pt-[20px] pb-[calc(45px+var(--sab))]">
       <header className="flex items-center gap-3">
         <button type="button" onClick={() => navigate('/')} className="px-1 text-[18px] text-ink-2" aria-label="뒤로">
           ←

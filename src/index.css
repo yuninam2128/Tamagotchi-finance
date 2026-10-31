@@ -43,6 +43,23 @@
   --shadow-glow-lg: 0 0 250px 0 var(--color-lime-glow);
 }
 
+/* 아이폰 노치·다이내믹 아일랜드·홈 바. 여백은 앱 틀(App)과 바닥 버튼에서만 쓴다 */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+}
+
+/* 화면 아래 주 버튼: 내용이 길어도 화면 바닥에 붙어 있다 */
+@utility action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  margin-top: auto;
+  padding-top: 12px;
+  padding-bottom: calc(16px + var(--sab));
+  background: linear-gradient(to top, var(--color-bg) 70%, transparent);
+}
+
 @layer base {
   html {
     color-scheme: dark;
@@ -50,8 +67,6 @@
   }
   body {
     @apply bg-bg text-ink font-sans;
-    min-height: 100dvh;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     -webkit-font-smoothing: none;
   }
   button {

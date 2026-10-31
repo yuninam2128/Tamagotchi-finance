@@ -36,7 +36,7 @@ export default function Egg() {
     })
 
   return (
-    <main className="flex flex-1 flex-col gap-4 px-1.5 pt-6 pb-[calc(24px+env(safe-area-inset-bottom))]">
+    <main className="flex flex-1 flex-col gap-4 px-1.5 pt-6">
       <Bubble>
         {pet.gen}세대 알을 골라줘! 고른 힘을 키우면 그 모습으로 자라. 약한 힘일수록 도감 채우기에 좋아.
       </Bubble>
@@ -83,10 +83,12 @@ export default function Egg() {
           )
         })}
       </ul>
-      <Button className="mt-auto shadow-glow-lg" disabled={choose.isPending} onClick={start}>
-        {eggInfo(selected).egg}로 시작하기
-      </Button>
-      {choose.isError && <p className="text-center text-[12px] text-orange">알을 고르지 못했어. 다시 눌러줘.</p>}
+      <div className="action-bar">
+        {choose.isError && <p className="mb-2 text-center text-[12px] text-orange">알을 고르지 못했어. 다시 눌러줘.</p>}
+        <Button className="shadow-glow-lg" disabled={choose.isPending} onClick={start}>
+          {eggInfo(selected).egg}로 시작하기
+        </Button>
+      </div>
     </main>
   )
 }

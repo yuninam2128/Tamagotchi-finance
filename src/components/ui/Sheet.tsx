@@ -35,7 +35,7 @@ export function Sheet({
     >
       <div
         className={`animate-rise mx-auto max-w-[460px] border border-lime bg-black p-5 ${
-          center ? 'rounded-[13px]' : 'rounded-t-[13px] border-b-0 pb-[calc(20px+env(safe-area-inset-bottom))]'
+          center ? 'rounded-[13px]' : 'rounded-t-[13px] border-b-0 pb-[calc(20px+var(--sab))]'
         }`}
       >
         <div className="mb-4 flex items-center justify-between gap-3">

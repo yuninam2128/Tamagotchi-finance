@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router'
-import { useDailySet, useForecasts, useGraduate, useHome, useLeague, useNews, usePet } from '../api/game'
+import { useDailySet, useForecasts, useGraduate, useHome, useInvalidateGame, useLeague, useNews, usePet } from '../api/game'
 import { ForecastStamps } from '../components/ForecastStamps'
 import { Pet } from '../components/pet/Pet'
 import type { Mood } from '../components/pet/lcd'
@@ -39,6 +39,23 @@ export default function Home() {
   const [seenNews, setSeenNews] = useState(() => store.get('seenNews', ''))
   const [seenResult, setSeenResult] = useState(() => store.get('seenResult', ''))
   const [evolved, setEvolved] = useState(() => store.take<{ stage: number; form: string | null }>('evolved'))
+  const [timeSkip, setTimeSkip] = useState(false)
+  const invalidate = useInvalidateGame()
+
+  // 시연 흐름: 성체 진화를 보고 나면 18시 결과 발표가 이어서 뜬다
+  const closeEvolve = () => {
+    const adult = evolved?.stage === 3
+    setEvolved(null)
+    if (DEMO && adult) setTimeout(() => setSeenResult(''), 500)
+  }
+  // 시연 흐름: 교환권을 확인하면 '7일 뒤'로 건너뛰어 졸업 준비 상태가 된다
+  const skipWeek = async () => {
+    setTimeSkip(true)
+    const { demoControls } = await import('../demo/api')
+    demoControls.readyToGraduate()
+    await invalidate()
+    setTimeout(() => setTimeSkip(false), 2200)
+  }
 
   // 뉴스 말풍선은 6초마다 다음 헤드라인
   useEffect(() => {
@@ -92,7 +109,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-1 flex-col gap-4 px-1.5 pb-[45px]">
+    <main className="flex flex-1 flex-col gap-4 px-1.5 pb-[calc(45px+var(--sab))]">
       <header className="relative z-10 flex items-center gap-3 pt-[14px]">
         <button type="button" onClick={openNews} className="min-w-0 flex-1 text-left" aria-label="뉴스 보기">
           <Bubble className="mr-2">
@@ -114,13 +131,7 @@ export default function Home() {
 
       <Pet lcd={lcd} onTap={tapPet} className="-mx-4 -mt-[120px] h-[420px]" />
 
-      <StatStrip stats={home.stats} onSelect={setStat} />
-
-      <section aria-label="오늘의 예보" className="grid gap-2">
-        <ForecastStamps picks={todayPicks} onSelect={setPickAsset} />
-        <p className="text-center text-[15px] leading-[1.6]">{remaining} 뒤 발표됩니다.</p>
-      </section>
-
+      {/* 졸업할 때가 되면 지갑몬 바로 아래에 (스크롤 없이 보이게) */}
       {pet?.can_graduate && (
         <section className="grid gap-2 rounded-[13px] border border-lime p-3 text-center">
           <p className="text-[13px] leading-[1.6]">
@@ -133,6 +144,13 @@ export default function Home() {
           </Button>
         </section>
       )}
+
+      <StatStrip stats={home.stats} onSelect={setStat} />
+
+      <section aria-label="오늘의 예보" className="grid gap-2">
+        <ForecastStamps picks={todayPicks} onSelect={setPickAsset} />
+        <p className="text-center text-[15px] leading-[1.6]">{remaining} 뒤 발표됩니다.</p>
+      </section>
 
       <Button
         onClick={() => navigate('/session')}
@@ -190,7 +208,7 @@ export default function Home() {
 
       <StatSheet stat={stat} stats={home.stats} onClose={() => setStat(null)} />
       <ForecastPickSheet asset={pickAsset} current={pickAsset ? todayPicks[pickAsset] : undefined} onClose={() => setPickAsset(null)} />
-      <WalletSheet open={sheet === 'points'} points={home.points} onClose={() => setSheet(null)} />
+      <WalletSheet open={sheet === 'points'} points={home.points} onClose={() => setSheet(null)} onRedeemed={DEMO ? skipWeek : undefined} />
       <NewsSheet open={sheet === 'news'} onClose={() => setSheet(null)} />
       <ResultModal
         day={resultDay}
@@ -203,7 +221,15 @@ export default function Home() {
           if (params.get('result')) setParams({}, { replace: true })
         }}
       />
-      <EvolveModal evolved={evolved} onClose={() => setEvolved(null)} />
+      <EvolveModal evolved={evolved} onClose={closeEvolve} />
+      {timeSkip && (
+        <div className="animate-rise fixed inset-0 z-50 grid place-items-center bg-black text-center" role="status">
+          <div>
+            <p className="text-[32px] font-bold text-lime">7일 뒤</p>
+            <p className="mt-2 text-[13px] text-ink-2">성체 지갑몬과 매일 함께했어</p>
+          </div>
+        </div>
+      )}
       <GraduateModal graduation={graduate.data ?? null} onNext={() => navigate('/egg')} />
     </main>
   )

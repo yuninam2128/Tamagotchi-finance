@@ -16,7 +16,7 @@ export default function App() {
   // 시연 메뉴가 홈을 다시 열 때만 바뀌는 값
   const homeKey = (location.state as { demoTick?: number } | null)?.demoTick ?? 'home'
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[460px] flex-col px-4">
+    <div className="mx-auto flex min-h-dvh max-w-[460px] flex-col px-4 pt-[var(--sat)]">
       {DEMO && (
         <Suspense fallback={null}>
           <DemoPanel />

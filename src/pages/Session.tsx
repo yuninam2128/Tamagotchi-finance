@@ -94,7 +94,7 @@ export default function Session() {
 
 function Shell({ progress, onClose, children }: { progress: number; onClose: () => void; children: React.ReactNode }) {
   return (
-    <main className="flex flex-1 flex-col gap-5 px-2 pt-[20px] pb-[calc(24px+env(safe-area-inset-bottom))]">
+    <main className="flex flex-1 flex-col gap-5 px-2 pt-[20px]">
       <div className="flex items-center gap-3">
         <button type="button" onClick={onClose} aria-label="그만하기" className="px-1 text-[18px] leading-none text-ink-2">
           ✕
@@ -151,7 +151,7 @@ function ForecastStep({ asset, intro, headline, onDone }: { asset: Asset; intro:
           </button>
         ))}
       </div>
-      <div className="mt-auto">
+      <div className="action-bar">
         <Button
           disabled={!pick || submit.isPending}
           onClick={() => pick && submit.mutate({ asset, pick }, { onSuccess: (r) => onDone(r.points) })}
@@ -251,7 +251,7 @@ function ItemStep({ item, intro, onDone }: { item: Item; intro: string | null; o
 
       {result && <Explanation text={result.explanation} sources={result.sources ?? []} promo={result.promo ?? null} />}
 
-      <div className="mt-auto pt-2">
+      <div className="action-bar">
         {result ? (
           <Button onClick={() => onDone(result)}>계속하기</Button>
         ) : (

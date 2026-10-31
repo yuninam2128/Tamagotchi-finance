@@ -36,7 +36,7 @@ export default function DemoPanel() {
         aria-label="시연 모드 · 메뉴"
         className={
           DEMO_REC
-            ? 'fixed top-1 left-1 z-40 size-6 rounded-full bg-lime/15'
+            ? 'fixed top-[calc(var(--sat)+4px)] left-1 z-40 size-6 rounded-full bg-lime/15'
             : 'relative z-20 mt-2 self-center rounded-full border border-lime bg-black px-3 py-1 text-[11px] text-lime'
         }
       >
@@ -74,7 +74,6 @@ export default function DemoPanel() {
             onClick={() =>
               run(() => {
                 demoControls.reset()
-                store.set('seenResult', '')
                 store.set('seenNews', '')
               })
             }

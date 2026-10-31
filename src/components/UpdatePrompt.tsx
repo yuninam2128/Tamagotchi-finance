@@ -10,12 +10,12 @@ export function UpdatePrompt() {
   if (!needRefresh) return null
 
   return (
-    <div role="status" className="fixed inset-x-4 bottom-[calc(16px+env(safe-area-inset-bottom))] mx-auto flex max-w-[428px] items-center gap-3 rounded-lg border border-line bg-surface p-3 text-sm">
+    <div role="status" className="fixed inset-x-4 bottom-[calc(16px+var(--sab))] z-50 mx-auto flex max-w-[428px] items-center gap-3 rounded-[13px] border border-lime bg-black p-3 text-[13px]">
       <span className="flex-1">새 버전이 있어요.</span>
       <button className="rounded-md px-3 py-2 text-ink-2" onClick={() => setNeedRefresh(false)}>
         나중에
       </button>
-      <button className="rounded-md bg-accent px-3 py-2 font-semibold text-white" onClick={() => updateServiceWorker(true)}>
+      <button className="rounded-[8px] bg-lime px-3 py-2 font-bold text-black" onClick={() => updateServiceWorker(true)}>
         업데이트
       </button>
     </div>

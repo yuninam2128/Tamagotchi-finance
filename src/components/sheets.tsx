@@ -56,7 +56,17 @@ const REASON_LABEL: Record<string, string> = {
 }
 
 /** 지갑: 모은 돈 + 교환 목표 + 거래내역. 실제 교환은 아직 열지 않았고, 시연 모드에서만 쿠폰까지 받아볼 수 있다. */
-export function WalletSheet({ open, points, onClose }: { open: boolean; points: number; onClose: () => void }) {
+export function WalletSheet({
+  open,
+  points,
+  onClose,
+  onRedeemed,
+}: {
+  open: boolean
+  points: number
+  onClose: () => void
+  onRedeemed?: () => void // 시연: 교환권을 확인하면 다음 장면으로
+}) {
   const { data: rows } = useLedger()
   const invalidate = useInvalidateGame()
   const [coupon, setCoupon] = useState<Reward | null>(null)
@@ -76,7 +86,13 @@ export function WalletSheet({ open, points, onClose }: { open: boolean; points: 
   return (
     <Sheet open={open} onClose={close} title={coupon ? '교환 완료' : '내 지갑'}>
       {coupon ? (
-        <Coupon reward={coupon} onDone={() => setCoupon(null)} />
+        <Coupon
+          reward={coupon}
+          onDone={() => {
+            close()
+            onRedeemed?.()
+          }}
+        />
       ) : (
         <div className="grid gap-4">
           <p className="flex items-center gap-2 text-[26px] font-bold tabular-nums">
@@ -155,7 +171,7 @@ function Coupon({ reward, onDone }: { reward: Reward; onDone: () => void }) {
         <p className="mt-3 text-[11px] text-card-ink-2">유효기간 {until}까지</p>
       </div>
       <p className="text-center text-[11px] leading-[1.6] text-orange">시연용 쿠폰이라 실제로는 쓸 수 없어.</p>
-      <Button onClick={onDone}>지갑으로</Button>
+      <Button onClick={onDone}>확인</Button>
     </div>
   )
 }

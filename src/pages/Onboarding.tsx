@@ -33,7 +33,7 @@ export default function Onboarding() {
 
   if (phase === 'intro') {
     return (
-      <main className="flex flex-1 flex-col gap-4 px-2 pt-6 pb-[calc(24px+env(safe-area-inset-bottom))]">
+      <main className="flex flex-1 flex-col gap-4 px-2 pt-6">
         <Bubble className="z-10">알을 발견했어! 5문제로 지갑몬의 성격을 정해볼게. 모르면 찍어도 괜찮아.</Bubble>
         <Pet lcd={{ stage: 0, symptoms: [], mood: 'idle', news: false }} className="-mx-4 -mt-[120px] h-[460px]" />
         <p className="text-center text-[13px] leading-[1.7] text-ink-2">
@@ -41,9 +41,11 @@ export default function Onboarding() {
           <br />
           네 개의 힘으로 자라는 금융 다마고치야
         </p>
-        <Button className="mt-auto shadow-glow-lg" disabled={!items?.length} onClick={() => setPhase('quiz')}>
-          진단 시작
-        </Button>
+        <div className="action-bar">
+          <Button className="shadow-glow-lg" disabled={!items?.length} onClick={() => setPhase('quiz')}>
+            진단 시작
+          </Button>
+        </div>
       </main>
     )
   }
@@ -63,7 +65,7 @@ export default function Onboarding() {
     }
     const body = item.body as QuizBody & FraudBody
     return (
-      <main className="flex flex-1 flex-col gap-5 px-2 pt-[20px] pb-[calc(24px+env(safe-area-inset-bottom))]">
+      <main className="flex flex-1 flex-col gap-5 px-2 pt-[20px]">
         <PixelBar value={(idx / items!.length) * 100} height={22} label="진단 진행도" />
         <p className="text-[12px] text-lime">진단 {idx + 1} / {items!.length}</p>
         {item.type === 'fraud' ? (
@@ -98,16 +100,18 @@ export default function Onboarding() {
             </button>
           ))}
         </div>
-        <Button className="mt-auto" disabled={choice === null || diagnose.isPending} onClick={next}>
-          {diagnose.isPending ? '부화 중…' : diagnose.isError ? '다시 시도' : idx + 1 < items!.length ? '다음' : '결과 보기'}
-        </Button>
+        <div className="action-bar">
+          <Button disabled={choice === null || diagnose.isPending} onClick={next}>
+            {diagnose.isPending ? '부화 중…' : diagnose.isError ? '다시 시도' : idx + 1 < items!.length ? '다음' : '결과 보기'}
+          </Button>
+        </div>
       </main>
     )
   }
 
   // 부화
   return (
-    <main className="flex flex-1 flex-col gap-4 px-2 pt-6 pb-[calc(24px+env(safe-area-inset-bottom))]">
+    <main className="flex flex-1 flex-col gap-4 px-2 pt-6">
       <Bubble className="z-10">
         <span className="font-bold">부화했어!</span> 지금 힘은 이 정도야. 약한 쪽부터 같이 키워보자.
       </Bubble>
@@ -131,16 +135,18 @@ export default function Onboarding() {
           className="h-[51px] rounded-[13px] border border-line bg-black px-4 text-[15px] text-white placeholder:text-ink-3 focus:border-lime focus:outline-none"
         />
       </label>
-      <Button
-        className="mt-auto shadow-glow-lg"
-        disabled={setNick.isPending}
-        onClick={async () => {
-          if (nick.trim()) await setNick.mutateAsync(nick).catch(() => undefined)
-          navigate('/', { replace: true })
-        }}
-      >
-        지갑몬 돌보러 가기
-      </Button>
+      <div className="action-bar">
+        <Button
+          className="shadow-glow-lg"
+          disabled={setNick.isPending}
+          onClick={async () => {
+            if (nick.trim()) await setNick.mutateAsync(nick).catch(() => undefined)
+            navigate('/', { replace: true })
+          }}
+        >
+          지갑몬 돌보러 가기
+        </Button>
+      </div>
     </main>
   )
 }
