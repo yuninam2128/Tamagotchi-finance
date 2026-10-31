@@ -78,7 +78,7 @@ Vault 에는 `project_url`, `cron_secret` 두 값이 있다 (`npx supabase db qu
   최적화한 뒤 원래 있던 TAMAGOTCHI 로고를 지우고 '지갑몬' 명판을 붙였다. 순서와 스크립트는 [scripts/model/README.md](scripts/model/README.md).
   모델의 LCD 는 텍스처에 구워져 있어서, `PetStage.tsx` 가 그 위에 캔버스 판(`LCD_POS`, `LCD_SIZE`)을 덮어 성장 단계·증상을 그린다. 모델을 바꾸면 이 두 값을 다시 맞춰야 한다.
 - 성장 단계 그림: `design-src/*.png` → `src/assets/pets/stage-0~3.png`
-- 앱 아이콘: 성장 2단계 생물을 도트 SVG 로 옮긴 `public/favicon.svg` → `npm run pwa:icons`
+- 앱 로고: 원본 `design-src/jigapmon-logo.png` → 512px `public/logo.png` → `npm run pwa:icons` 로 설치 아이콘 생성. 브라우저 탭 아이콘 `public/favicon.svg` 는 작은 크기에서 글씨가 뭉개져서 지갑·알 부분만 잘라 넣었다.
 - 아이콘: Figma 아이콘 시트에서 잘라 `src/assets/icons/` (픽셀이라 `image-rendering: pixelated`)
 
 ## 시연 모드

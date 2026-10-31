@@ -25,5 +25,5 @@ npm i @gltf-transform/core @gltf-transform/extensions @gltf-transform/cli meshop
 
 ## 앱 아이콘
 
-`node icon.mjs src/assets/pets/stage-2.png public/favicon.svg 8.533` 로 성장 2단계 생물을 도트 SVG 로 옮긴 뒤
-`npm run pwa:icons` 로 PNG 아이콘을 다시 만든다. 마지막 숫자는 원본 그림의 도트 한 칸 크기(px)다.
+지금 앱 아이콘은 `design-src/jigapmon-logo.png` 로고에서 만든다 (메인 README 의 에셋 참고).
+`icon.mjs` 는 도트 그림을 SVG 로 옮기는 도구로 남겨뒀다: `node icon.mjs <그림.png> <출력.svg> <도트 한 칸 px>`
