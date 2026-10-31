@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+
+/* 갈무리11 (OFL, quiple/galmuri v2.40.4) — 픽셀 폰트라 11px 배수에서 가장 선명하다 */
+@font-face {
+  font-family: 'Galmuri11';
+  src: url('./assets/fonts/Galmuri11.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Galmuri11';
+  src: url('./assets/fonts/Galmuri11-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/*
+ * 디자인 토큰 — Figma 홈(5:157) 기준: 검정 배경 + 연두 테두리·글로우 + 흰 카드 + 픽셀 아이콘.
+ * Figma 파일에 변수가 없어 디자인 값을 직접 옮겼다.
+ */
+@theme {
+  --color-bg: #000000;
+  --color-ink: #ffffff;
+  --color-ink-2: #b9b9b9;
+  --color-ink-3: #7a7a7a;
+  --color-card: #ffffff;
+  --color-card-ink: #000000;
+  --color-card-ink-2: #5c5c5c;
+  --color-line: #2e2e2e;
+  --color-lime: #9dd949;
+  --color-lime-glow: #91d544;
+  --color-lime-dark: #4f7a1c;
+  --color-track: #1f2a14;
+  --color-orange: #f2762e;
+  --color-gold: #f7b500;
+  --color-rank: #1a0d17; /* 랭킹 레퍼런스 배경 */
+  --color-lcd: #d8f5d0;
+
+  --font-sans: 'Galmuri11', ui-monospace, monospace;
+
+  --radius-card: 13px;
+  --shadow-glow: 0 0 24px 0 var(--color-lime-glow);
+  --shadow-glow-lg: 0 0 250px 0 var(--color-lime-glow);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-bg text-ink font-sans;
+    min-height: 100dvh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    -webkit-font-smoothing: none;
+  }
+  button {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-lime);
+    outline-offset: 2px;
+  }
+  img.pixel {
+    image-rendering: pixelated;
+  }
+}
+
+@keyframes pop {
+  40% { transform: scale(1.12); }
+}
+@keyframes rise {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes blink {
+  50% { opacity: 0.2; }
+}
+@utility animate-pop {
+  animation: pop 0.45s;
+}
+@utility animate-rise {
+  animation: rise 0.3s ease-out;
+}
+@utility animate-blink {
+  animation: blink 1s steps(2) infinite;
+}
