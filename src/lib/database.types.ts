@@ -178,8 +178,9 @@ export type Database = {
           difficulty: number
           explanation: string
           id: string
+          promo: Json | null
           skill_id: string
-          source_ref: string | null
+          sources: Json
           type: Database["public"]["Enums"]["item_type"]
         }
         Insert: {
@@ -190,8 +191,9 @@ export type Database = {
           difficulty?: number
           explanation: string
           id: string
+          promo?: Json | null
           skill_id: string
-          source_ref?: string | null
+          sources?: Json
           type: Database["public"]["Enums"]["item_type"]
         }
         Update: {
@@ -202,8 +204,9 @@ export type Database = {
           difficulty?: number
           explanation?: string
           id?: string
+          promo?: Json | null
           skill_id?: string
-          source_ref?: string | null
+          sources?: Json
           type?: Database["public"]["Enums"]["item_type"]
         }
         Relationships: [
@@ -276,6 +279,50 @@ export type Database = {
         }
         Relationships: []
       }
+      pets: {
+        Row: {
+          born_on: string | null
+          days: number
+          form: string
+          gen: number
+          graduated_at: string
+          id: number
+          stats_end: Json | null
+          stats_start: Json | null
+          uid: string
+        }
+        Insert: {
+          born_on?: string | null
+          days: number
+          form: string
+          gen: number
+          graduated_at?: string
+          id?: never
+          stats_end?: Json | null
+          stats_start?: Json | null
+          uid: string
+        }
+        Update: {
+          born_on?: string | null
+          days?: number
+          form?: string
+          gen?: number
+          graduated_at?: string
+          id?: never
+          stats_end?: Json | null
+          stats_start?: Json | null
+          uid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pets_uid_fkey"
+            columns: ["uid"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["uid"]
+          },
+        ]
+      }
       player_skills: {
         Row: {
           interval_days: number
@@ -320,35 +367,50 @@ export type Database = {
       }
       players: {
         Row: {
+          adult_on: string | null
           baseline: Json | null
           born_at: string | null
           created_at: string
+          gen_stats: Json | null
           league_code: string | null
           nick: string | null
+          pet_focus: string | null
           pet_form: string | null
+          pet_gen: number
           pet_stage: number
+          pet_start: string | null
           tier: number
           uid: string
         }
         Insert: {
+          adult_on?: string | null
           baseline?: Json | null
           born_at?: string | null
           created_at?: string
+          gen_stats?: Json | null
           league_code?: string | null
           nick?: string | null
+          pet_focus?: string | null
           pet_form?: string | null
+          pet_gen?: number
           pet_stage?: number
+          pet_start?: string | null
           tier?: number
           uid: string
         }
         Update: {
+          adult_on?: string | null
           baseline?: Json | null
           born_at?: string | null
           created_at?: string
+          gen_stats?: Json | null
           league_code?: string | null
           nick?: string | null
+          pet_focus?: string | null
           pet_form?: string | null
+          pet_gen?: number
           pet_stage?: number
+          pet_start?: string | null
           tier?: number
           uid?: string
         }
@@ -512,6 +574,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      choose_egg: { Args: { p_focus: string }; Returns: Json }
       effective_mastery: {
         Args: {
           p_interval: number
@@ -535,11 +598,14 @@ export type Database = {
           stat: Database["public"]["Enums"]["stat_kind"]
         }[]
       }
+      get_pet: { Args: never; Returns: Json }
+      graduate_pet: { Args: never; Returns: Json }
       items_json: {
         Args: { p_day: string; p_ids: string[]; p_uid: string }
         Returns: Json
       }
       kst_today: { Args: never; Returns: string }
+      pet_days: { Args: { p_from: string; p_uid: string }; Returns: number }
       resolve_forecasts: { Args: { p_day: string }; Returns: number }
       set_league: { Args: { p_code?: string }; Returns: string }
       start_treatment: {

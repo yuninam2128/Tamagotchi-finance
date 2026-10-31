@@ -10,11 +10,13 @@ import {
   type AnswerResult,
   type Item,
 } from '../api/game'
+import { Explanation } from '../components/Explanation'
 import { Bubble } from '../components/ui/Bubble'
 import { Button } from '../components/ui/Button'
 import { PixelBar } from '../components/ui/PixelBar'
 import { PixelIcon } from '../components/ui/PixelIcon'
 import { ASSETS, type Asset, type Pick } from '../domain/forecast'
+import { signedWon } from '../domain/money'
 import { lowestStat, reasonText, STAT_META, type StatKey } from '../domain/stats'
 import { store } from '../lib/store'
 import { shuffledOrder } from '../lib/shuffle'
@@ -105,11 +107,18 @@ function Shell({ progress, onClose, children }: { progress: number; onClose: () 
 }
 
 /** 펫 말풍선 + 코인 (Figma 세션 상단) */
-function Speech({ children }: { children: React.ReactNode }) {
+function Speech({ children, gain = 0 }: { children: React.ReactNode; gain?: number }) {
   return (
     <div className="flex items-center gap-3">
       <Bubble className="flex-1">{children}</Bubble>
-      <PixelIcon name="coin" size={56} className="ml-1" />
+      <span className="relative ml-1">
+        <PixelIcon key={gain} name="coin" size={56} className={gain > 0 ? 'animate-pop' : ''} />
+        {gain > 0 && (
+          <span className="animate-rise absolute -top-5 left-1/2 -translate-x-1/2 text-[13px] font-bold whitespace-nowrap text-lime">
+            {signedWon(gain)}
+          </span>
+        )}
+      </span>
     </div>
   )
 }
@@ -179,11 +188,11 @@ function ItemStep({ item, intro, onDone }: { item: Item; intro: string | null; o
 
   return (
     <>
-      <Speech>
+      <Speech gain={result?.points}>
         {result ? (
           <>
             <span className="font-bold">{result.correct ? '정답!' : '아쉬워!'}</span> {meta.label} {result.before}→{result.after}
-            {result.points > 0 && <span className="text-lime-dark"> +{result.points}P</span>}
+            {result.points > 0 && <span className="text-lime-dark"> {signedWon(result.points)} 벌었어</span>}
           </>
         ) : (
           intro ?? `이 문제를 풀면 +${meta.label}`
@@ -240,7 +249,7 @@ function ItemStep({ item, intro, onDone }: { item: Item; intro: string | null; o
         </>
       )}
 
-      {result && <p className="animate-rise rounded-[13px] border border-lime p-4 text-[13px] leading-[1.7]">{result.explanation}</p>}
+      {result && <Explanation text={result.explanation} sources={result.sources ?? []} promo={result.promo ?? null} />}
 
       <div className="mt-auto pt-2">
         {result ? (
@@ -274,7 +283,7 @@ function Finish({
       <h1 className="text-[20px] font-bold">{empty ? '오늘 돌봄은 다 끝났어!' : treat ? '치료 끝!' : '오늘 돌봄 완료!'}</h1>
       {!empty && (
         <p className="text-[13px] text-ink-2">
-          {summary.answered}문제 중 {summary.correct}개 정답 · <span className="text-lime">+{summary.points}P</span>
+          {summary.answered}문제 중 {summary.correct}개 정답 · <span className="text-lime">{signedWon(summary.points)} 벌었어</span>
         </p>
       )}
       <ul className="grid w-full max-w-[280px] gap-2">

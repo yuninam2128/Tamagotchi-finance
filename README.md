@@ -21,8 +21,12 @@ npm run dev
 
 - **펫 스탯 = 약점 지표**: 방어·신용·주거·흐름. 각 스탯은 하위 스킬(19개) 숙련도 평균이고 복습일이 지나면 감쇠한다. 50 미만이면 LCD 에 증상(벌레·사슬·비샘·지갑 구멍), 15 미만이면 '아픔' → 집중 치료로 회복.
 - **하루 8문제**: 시장 예보 3 + 약점 문제 5 (첫 문제는 최약 스탯, 나머지는 약할수록 높은 가중치).
-- **예보**: 오늘 고르면 *다음 거래일* 결과로 채점, 매일 18시 발표. 코스피·환율은 한국은행 ECOS 종가, 비트코인은 업비트(다음날 18시 vs 당일 자정). 고르는 시점에 결과를 알 수 없게 하려는 규칙이다.
-- **성장**: 알 → (진단 5문제) 부화 → 활동 3일 새끼 → 10일 성체. 성체 칭호는 가장 높은 스탯(철벽형·신용왕·집지킴이·저축왕, 전부 80↑ 레전드).
+- **예보**: 오늘 고르면 *다음 거래일* 결과로 채점, 매일 18시 발표. 홈 우표를 눌러 오늘 자정까지 바꿀 수 있다. 코스피·환율은 한국은행 ECOS 종가, 비트코인은 업비트(다음날 18시 vs 당일 자정). 고르는 시점에 결과를 알 수 없게 하려는 규칙이다.
+- **성장**: 알 → (진단 5문제) 부화 → 활동 3일 새끼 → 10일 성체 → 성체로 7일 → **졸업**(도감에 기록) → 새 알 고르기.
+  1세대 성체 모습은 가장 높은 스탯(철벽형·신용왕·집지킴이·저축왕). 2세대부터는 키울 힘(알)을 고르고 그 힘이 60 이상이어야 그 모습으로 성체가 된다.
+  레전드 알은 네 모습을 모두 모으면 열리고 모든 힘 80 이상이 조건. 숙련도는 세대를 넘어 이어진다. 서버: `update_pet`·`get_pet`·`graduate_pet`·`choose_egg`.
+- **지갑**: 서버 포인트 1 = 1원으로 보여준다(정답 5원, 오답 2원, 예보 참여 2원, 적중 20원, 하루 최대 100원). 교환은 아직 열지 않았다.
+- **공유 카드**: 진화 팝업·랭킹 화면에서 1080×1350 이미지 카드(캐릭터·칭호·스탯·리그 코드)를 만들어 공유한다. 캐릭터 그림 규칙은 `src/components/pet/sprites.ts`.
 - **랭킹**: 주간 포인트, 같은 티어끼리. 실제 플레이어가 10명 미만이면 '봇' 표시가 붙은 봇으로 채운다. 친구 리그 코드.
 - **보안**: 채점·숙련도·포인트는 전부 security definer RPC 에서 처리. 클라이언트는 정답 컬럼을 읽을 수 없고 포인트 원장에 쓸 수 없다.
 
@@ -64,15 +68,21 @@ Vault 에는 `project_url`, `cron_secret` 두 값이 있다 (`npx supabase db qu
 | `npm run content:sql` | `content/`의 스킬·문제를 검증하고 upsert 마이그레이션 생성 |
 
 문제 추가·수정: `content/items.mjs` 편집 → `npm run content:sql` → `npm run db:push`.
+- 해설 출처: `content/sources.mjs`. 통계·조항을 말하는 해설은 `itemSources` 에 근거를 달고(화면에 '출처'), 나머지는 스킬별 공식 안내가 '더 알아보기'로 붙는다. 숫자가 있는데 출처가 없으면 `content:sql` 이 경고한다.
+- 제휴 상품: `content/promos.mjs`. 해설 아래 '제휴' 표시와 수수료 고지가 붙은 카드로 나온다 (지금은 비어 있음).
 엣지 함수 배포: `npx supabase functions deploy news market push --use-api`.
 
 ## 에셋
 
-- 3D 모델: `design-src/tamagotchi-3d-model.glb`(원본 63MB, git 제외) → `public/models/tamagotchi.glb`(0.85MB)
-  ```bash
-  npx @gltf-transform/cli optimize design-src/tamagotchi-3d-model.glb public/models/tamagotchi.glb \
-    --compress meshopt --texture-compress webp --texture-size 1024 --simplify-ratio 0.06 --simplify-error 0.0005
-  ```
+- 3D 모델: `design-src/tamagotchi-3d-model.glb`(원본 63MB, git 제외) → `public/models/tamagotchi.glb`(0.95MB).
+  최적화한 뒤 원래 있던 TAMAGOTCHI 로고를 지우고 '지갑몬' 명판을 붙였다. 순서와 스크립트는 [scripts/model/README.md](scripts/model/README.md).
   모델의 LCD 는 텍스처에 구워져 있어서, `PetStage.tsx` 가 그 위에 캔버스 판(`LCD_POS`, `LCD_SIZE`)을 덮어 성장 단계·증상을 그린다. 모델을 바꾸면 이 두 값을 다시 맞춰야 한다.
 - 성장 단계 그림: `design-src/*.png` → `src/assets/pets/stage-0~3.png`
+- 앱 아이콘: 성장 2단계 생물을 도트 SVG 로 옮긴 `public/favicon.svg` → `npm run pwa:icons`
 - 아이콘: Figma 아이콘 시트에서 잘라 `src/assets/icons/` (픽셀이라 `image-rendering: pixelated`)
+
+## 시연 모드
+
+주소 끝에 `?demo` 를 붙여 열면(예: `https://<도메인>/?demo`) 서버 없이 가짜 데이터로 돌아간다. 위쪽 '시연 모드 · 메뉴'에서
+18시 결과 발표, 진화 장면, 아픈 상태, 성장 단계 넘기기, 알부터 다시 시작을 바로 띄울 수 있다. 지갑에서 모은 돈으로 교환해 시연용 쿠폰을 받아볼 수 있고, 해설에는 가상의 제휴 상품(예시은행·예시보증) 카드가 나온다. 실제 계정·랭킹에는 아무것도 남지 않고,
+탭을 닫거나 `?demo=off` 로 열면 꺼진다. 녹화할 때는 `?demo=rec` 로 열면 메뉴 버튼이 왼쪽 위 흐린 점으로 바뀌고, 메뉴의 '시연 처음으로'로 재촬영 상태를 만든다. 코드는 `src/demo/` (일반 사용자 번들에는 들어가지 않는다).

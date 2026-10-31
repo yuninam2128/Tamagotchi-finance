@@ -1,12 +1,9 @@
-import stamp1 from '../assets/icons/stamp-1.png'
-import stamp2 from '../assets/icons/stamp-2.png'
-import stamp3 from '../assets/icons/stamp-3.png'
+import stamp from '../assets/icons/stamp-1.png'
 import { ASSETS, type Asset, type Pick } from '../domain/forecast'
 import { PixelIcon } from './ui/PixelIcon'
 
-const STAMPS = [stamp1, stamp2, stamp3]
-
-// Figma 홈(5:157) 우표 3칸: 오른다=상승 화살표, 내린다=하락 화살표, 아직 안 고름=별꽃
+// Figma 홈(5:157) 우표 3칸: 오른다=상승 화살표, 내린다=하락 화살표, 아직 안 고름=별꽃.
+// 아이콘 시트의 우표는 모양이 제각각이라(가운데 것만 세로로 김) 세 칸 모두 같은 우표를 쓴다.
 export function ForecastStamps({
   picks,
   results,
@@ -18,7 +15,7 @@ export function ForecastStamps({
 }) {
   return (
     <ul className="grid grid-cols-3 gap-1">
-      {ASSETS.map((a, i) => {
+      {ASSETS.map((a) => {
         const pick = picks[a.key]
         const hit = results?.[a.key]
         return (
@@ -32,7 +29,7 @@ export function ForecastStamps({
                 hit == null ? '' : hit ? ', 적중' : ', 빗나감'
               }`}
             >
-              <img src={STAMPS[i]} alt="" className="pixel absolute inset-0 size-full object-contain" />
+              <img src={stamp} alt="" className="pixel absolute inset-0 size-full object-contain" />
               <span className="absolute inset-[17%] flex flex-col items-center justify-center gap-1">
                 <PixelIcon
                   name={pick === 'up' ? 'arrow-up' : pick === 'down' ? 'arrow-down' : 'asterisk'}

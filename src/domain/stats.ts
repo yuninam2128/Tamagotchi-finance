@@ -32,12 +32,23 @@ export const FORM_LABEL: Record<string, string> = {
   legend: '레전드',
 }
 
+/** 도감 순서. 레전드 알은 앞의 네 모습을 모두 모으면 열린다. 기준값은 서버 update_pet 과 같다. */
+export const FORMS = ['shield', 'credit', 'home', 'flow', 'legend'] as const
+export const FOCUS_MIN = 60
+export const LEGEND_MIN = 80
+/** 알 이름과 성체가 되는 조건 */
+export function eggInfo(form: string) {
+  if (form === 'legend') return { egg: '레전드 알', rule: `모든 힘 ${LEGEND_MIN} 이상` }
+  const m = STAT_META[form as StatKey]
+  return { egg: `${m.label} 알`, rule: `${m.label} ${FOCUS_MIN} 이상` }
+}
+
 /** 알(0) → 부화(1) → 새끼(2) → 성체(3). 진화 조건은 서버 update_pet 과 같다. */
 export const STAGES = [
   { name: '알', next: '5문제 진단을 마치면 부화해' },
   { name: '아기', next: '3일 돌보면 자라' },
   { name: '새끼', next: '10일 돌보면 성체가 돼' },
-  { name: '성체', next: null },
+  { name: '성체', next: '성체로 7일 돌보면 졸업해' },
 ] as const
 
 export type StatState = 'sick' | 'symptom' | 'ok'

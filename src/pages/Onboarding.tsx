@@ -34,8 +34,8 @@ export default function Onboarding() {
   if (phase === 'intro') {
     return (
       <main className="flex flex-1 flex-col gap-4 px-2 pt-6 pb-[calc(24px+env(safe-area-inset-bottom))]">
-        <Bubble>알을 발견했어! 5문제로 지갑몬의 성격을 정해볼게. 모르면 찍어도 괜찮아.</Bubble>
-        <Pet lcd={{ stage: 0, symptoms: [], mood: 'idle', news: false }} className="-mx-4 h-[360px]" />
+        <Bubble className="z-10">알을 발견했어! 5문제로 지갑몬의 성격을 정해볼게. 모르면 찍어도 괜찮아.</Bubble>
+        <Pet lcd={{ stage: 0, symptoms: [], mood: 'idle', news: false }} className="-mx-4 -mt-[120px] h-[460px]" />
         <p className="text-center text-[13px] leading-[1.7] text-ink-2">
           사기 방어 · 신용 · 주거 · 돈 흐름
           <br />
@@ -108,10 +108,10 @@ export default function Onboarding() {
   // 부화
   return (
     <main className="flex flex-1 flex-col gap-4 px-2 pt-6 pb-[calc(24px+env(safe-area-inset-bottom))]">
-      <Bubble>
+      <Bubble className="z-10">
         <span className="font-bold">부화했어!</span> 지금 힘은 이 정도야. 약한 쪽부터 같이 키워보자.
       </Bubble>
-      <Pet lcd={{ stage: 1, symptoms: [], mood: 'happy', news: false }} className="-mx-4 h-[280px]" />
+      <Pet lcd={{ stage: 1, symptoms: [], mood: 'happy', news: false }} className="-mx-4 -mt-[120px] h-[400px]" />
       <ul className="grid gap-3">
         {STAT_KEYS.map((k) => (
           <li key={k} className="flex items-center gap-2">

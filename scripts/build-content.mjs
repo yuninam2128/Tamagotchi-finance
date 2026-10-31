@@ -3,6 +3,8 @@
 import { writeFileSync } from 'node:fs'
 import { items } from '../content/items.mjs'
 import { skills } from '../content/skills.mjs'
+import { calcOnly, itemSources, REFS, skillRefs } from '../content/sources.mjs'
+import { promos } from '../content/promos.mjs'
 
 const MIN_PER_SKILL = 3
 const errors = []
@@ -18,10 +20,23 @@ for (const s of skills) {
   const n = items.filter((it) => it.skill === s.id && it.active !== false).length
   if (n < MIN_PER_SKILL) errors.push(`${s.id}: 문제 ${n}개 (최소 ${MIN_PER_SKILL})`)
 }
+for (const [id, refs] of [...Object.entries(itemSources), ...Object.entries(skillRefs)]) {
+  for (const r of refs) if (!REFS[r]) errors.push(`${id}: 없는 출처 ${r}`)
+}
+for (const id of Object.keys(promos)) if (!seen.has(id)) errors.push(`promos: 없는 문제 ${id}`)
+// 숫자(%·점·배·원)를 말하는 해설에 출처가 없으면 경고 (빌드는 계속)
+const needSource = items.filter((it) => /\d+(\.\d+)?\s*(%|점|배|만원|억)/.test(it.explanation) && !itemSources[it.id] && !calcOnly.includes(it.id))
+if (needSource.length) console.warn(`출처 필요 ${needSource.length}개:\n` + needSource.map((it) => `  ${it.id}: ${it.explanation}`).join('\n'))
 if (errors.length) {
   console.error(errors.join('\n'))
   process.exit(1)
 }
+
+// 해설 아래에 보여줄 출처: 근거(source) 먼저, 그다음 더 알아보기(ref)
+const sourcesOf = (it) => [
+  ...(itemSources[it.id] ?? []).map((r) => ({ kind: 'source', ...REFS[r] })),
+  ...(skillRefs[it.skill] ?? []).map((r) => ({ kind: 'ref', ...REFS[r] })),
+]
 
 const lit = (v) => (v == null ? 'null' : `'${String(v).replaceAll("'", "''")}'`)
 
@@ -29,7 +44,8 @@ const skillRows = skills.map((s, i) => `  (${lit(s.id)}, ${lit(s.stat)}, ${lit(s
 const itemRows = items
   .map((it) =>
     `  (${[lit(it.id), lit(it.type), lit(it.skill), it.difficulty ?? 1, `${lit(JSON.stringify(it.body))}::jsonb`,
-      it.answer, lit(it.explanation), lit(it.source), it.diag === true, it.active !== false].join(', ')})`)
+      it.answer, lit(it.explanation), `${lit(JSON.stringify(sourcesOf(it)))}::jsonb`, `${promos[it.id] ? lit(JSON.stringify(promos[it.id])) : 'null'}::jsonb`,
+      it.diag === true, it.active !== false].join(', ')})`)
   .join(',\n')
 
 const sql = `-- 자동 생성: scripts/build-content.mjs (직접 수정하지 말 것)
@@ -39,11 +55,11 @@ insert into public.skills (id, stat, name, sort) values
 ${skillRows}
 on conflict (id) do update set stat = excluded.stat, name = excluded.name, sort = excluded.sort;
 
-insert into public.items (id, type, skill_id, difficulty, body, answer, explanation, source_ref, diagnostic, active) values
+insert into public.items (id, type, skill_id, difficulty, body, answer, explanation, sources, promo, diagnostic, active) values
 ${itemRows}
 on conflict (id) do update set
   type = excluded.type, skill_id = excluded.skill_id, difficulty = excluded.difficulty, body = excluded.body,
-  answer = excluded.answer, explanation = excluded.explanation, source_ref = excluded.source_ref,
+  answer = excluded.answer, explanation = excluded.explanation, sources = excluded.sources, promo = excluded.promo,
   diagnostic = excluded.diagnostic, active = excluded.active;
 
 -- 파일에서 빠진 문제는 비활성화 (풀이 기록이 참조하므로 지우지 않는다)

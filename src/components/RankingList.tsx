@@ -1,4 +1,5 @@
 import type { LeagueRow } from '../api/game'
+import { won } from '../domain/money'
 import { FORM_LABEL, STAGES } from '../domain/stats'
 
 // Figma '랭킹 레퍼': 짙은 바탕에 큰 순위 숫자 + 이름 + 오른쪽 점수
@@ -23,7 +24,7 @@ export function RankingList({ rows, compact = false }: { rows: LeagueRow[]; comp
               <span className="block text-[11px] text-ink-3">{r.form ? FORM_LABEL[r.form] : STAGES[r.stage]?.name ?? ''}</span>
             )}
           </span>
-          <span className="text-[13px] tabular-nums text-ink-2">{r.score.toLocaleString('ko-KR')}P</span>
+          <span className="text-[13px] tabular-nums text-ink-2">{won(r.score)}</span>
         </li>
       ))}
     </ol>

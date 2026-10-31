@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useHome, useLeague, useSetLeague, useSetNick } from '../api/game'
 import { RankingList } from '../components/RankingList'
+import { ShareCardButton } from '../components/ShareCardButton'
 import { PixelIcon } from '../components/ui/PixelIcon'
 
 const TIERS = ['브론즈', '실버', '골드', '플래티넘', '다이아']
@@ -50,6 +51,8 @@ export default function League() {
         </p>
         <RankingList rows={league?.rows ?? []} />
       </section>
+
+      <ShareCardButton label="내 지갑몬 카드 공유하기" variant="ghost" />
 
       <section className="grid gap-2">
         <h2 className="pl-[14px] text-[15px] font-bold">친구 리그</h2>

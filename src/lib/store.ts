@@ -1,5 +1,8 @@
+import { DEMO } from './demo'
+
 // 기기별 편의 상태(본 뉴스, 본 결과, 화면 간 전달값). 사생활 모드 등에서 저장이 막혀도 앱은 동작해야 한다.
-const PREFIX = 'jigapmon.'
+// 시연 모드는 따로 둬서 실제 기록과 섞이지 않게 한다.
+const PREFIX = DEMO ? 'jigapmon.demo.' : 'jigapmon.'
 
 export const store = {
   get<T>(key: string, fallback: T): T {

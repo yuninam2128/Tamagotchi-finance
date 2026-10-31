@@ -1,9 +1,6 @@
 // 다마고치 LCD 화면을 캔버스에 그린다. 성장 단계 그림 위에 스탯 증상을 LCD 도트로 얹는다.
-import stage0 from '../../assets/pets/stage-0.png'
-import stage1 from '../../assets/pets/stage-1.png'
-import stage2 from '../../assets/pets/stage-2.png'
-import stage3 from '../../assets/pets/stage-3.png'
 import type { Symptom } from '../../domain/stats'
+import { petImage } from './sprites'
 
 export const LCD_W = 256
 export const LCD_H = 232
@@ -11,17 +8,11 @@ const DOT = 4 // LCD 도트 하나 = 4px
 const INK = '#16210f'
 const BG = '#dcf3d3'
 
-const STAGE_SRC = [stage0, stage1, stage2, stage3]
-const images: HTMLImageElement[] = STAGE_SRC.map((src) => {
-  const img = new Image()
-  img.src = src
-  return img
-})
-
 export type Mood = 'idle' | 'happy' | 'sick'
 
 export type LcdState = {
   stage: number
+  form?: string | null // 성체 모습
   symptoms: Symptom[]
   mood: Mood
   news: boolean // 새 뉴스가 들어오면 'NEWS' 깜빡임
@@ -50,7 +41,7 @@ export function drawLcd(ctx: CanvasRenderingContext2D, s: LcdState, t: number) {
   ctx.fillRect(0, 0, LCD_W, LCD_H)
 
   // 펫: 원작처럼 좌우로 한 칸씩 걷고, 기쁘면 통통 튄다. 아프면 가만히.
-  const img = images[Math.max(0, Math.min(3, s.stage))]
+  const img = petImage(s.stage, s.form)
   if (img.complete && img.naturalWidth) {
     const dx = s.mood === 'sick' ? 0 : ((beat % 4) < 2 ? -1 : 1) * DOT * (s.stage === 0 ? 0.5 : 1)
     const dy = s.mood === 'happy' ? -(beat % 2) * DOT * 2 : 0
